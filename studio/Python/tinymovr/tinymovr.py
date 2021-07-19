@@ -37,11 +37,11 @@ class Tinymovr:
         eps = {}
         for k, ep in self.iface.get_ep_map().items():
             if "write" in ep and "read" in ep:
-                eps[k] = MixedEndpoint(self.iface, ep["read"], ep["write"])
+                eps[k] = MixedEndpoint(node_id, self.iface, ep["read"], ep["write"])
             elif "write" in ep:
-                eps[k] = WriteEndpoint(self.iface, ep["write"])
+                eps[k] = WriteEndpoint(node_id, self.iface, ep["write"])
             elif "read" in ep:
-                eps[k] = ReadEndpoint(self.iface, ep["read"])
+                eps[k] = ReadEndpoint(node_id, self.iface, ep["read"])
             else:
                 raise ValueError("No valid read/write accessors in endpoint")
         self.eps = eps
@@ -64,8 +64,11 @@ class Tinymovr:
 
 
     def __getattr__(self, _attr: str):
-        ep = self.eps[_attr]   
-        ep.clear_cache()
+        ep = self.eps[_attr]
+        try:  
+            ep.clear_cache()
+        except AttributeError:
+            pass
         return ep       
 
     def calibrate(self):

@@ -8,15 +8,16 @@ ureg = get_registry()
 
 class Endpoint:
 
-    def __init__(self, iface):
+    def __init__(self, node_id, iface):
+        self.node_id = node_id
         self.iface = iface
         self.codec = self.iface.get_codec()
 
 
 class ReadEndpoint(Endpoint):
 
-    def __init__(self, iface, read_ep: Dict):
-        Endpoint.__init__(self, iface)
+    def __init__(self, node_id, iface, read_ep: Dict):
+        Endpoint.__init__(self, node_id, iface)
         self.read_ep = read_ep
         self.attrib_cache = {}
         self.data_cache = []
@@ -29,12 +30,15 @@ class ReadEndpoint(Endpoint):
         if len(self.data_cache) == 0:
             self.iface.send(self.node_id, self.read_ep["ep_id"])
             response = self.iface.receive(self.node_id, self.read_ep["ep_id"])
-            self.data_cache = self.self.codec.deserialize(response, *self.read_ep["types"])
+            self.data_cache = self.codec.deserialize(response, *self.read_ep["types"])
         return self.data_cache
 
-    def _getattr_(self, attrib):
+    def __getattr__(self, attrib):
         if attrib not in self.attrib_cache:
-            assert attrib in self.read_ep["labels"]
+            try:
+                assert attrib in self.read_ep["labels"]
+            except AssertionError:
+                import ipdb; ipdb.set_trace()
             data = self.get_data()
             i_attrib = self.read_ep["labels"].index(attrib)
             val = data[i_attrib]
@@ -64,8 +68,8 @@ class ReadEndpoint(Endpoint):
 
 class WriteEndpoint(Endpoint):
 
-    def __init__(self, iface, write_ep: Dict):
-        Endpoint.__init__(self, iface)
+    def __init__(self, node_id, iface, write_ep: Dict):
+        Endpoint.__init__(self, node_id, iface)
         self.write_ep = write_ep
             
     def __call__(self, *args, **kwargs):
@@ -96,7 +100,7 @@ class WriteEndpoint(Endpoint):
 
 class MixedEndpoint(ReadEndpoint, WriteEndpoint):
 
-    def __init__(self, iface, read_ep: Dict, write_ep: Dict):
-        ReadEndpoint.__init__(self, iface, read_ep)
-        WriteEndpoint.__init__(self, iface, write_ep)
+    def __init__(self, node_id, iface, read_ep: Dict, write_ep: Dict):
+        ReadEndpoint.__init__(self, node_id, iface, read_ep)
+        WriteEndpoint.__init__(self, node_id, iface, write_ep)
 
