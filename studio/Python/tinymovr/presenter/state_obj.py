@@ -44,5 +44,3 @@ class StateObj():
         else:
             strings.append('  None')
         p.text('\n'.join(strings))
-
-        

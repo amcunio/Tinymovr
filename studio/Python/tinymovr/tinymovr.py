@@ -18,8 +18,8 @@ from copy import copy
 import pkg_resources
 from packaging import version
 import json
+from tinymovr.endpoint import ReadEndpoint, WriteEndpoint, MixedEndpoint
 from tinymovr.iface import IFace
-from tinymovr.presenter import presenter_map, strip_end
 from tinymovr.constants import ControlStates, ControlModes
 from pint import Quantity as _Q
 
@@ -31,6 +31,19 @@ class Tinymovr:
     def __init__(self, node_id: int, iface: IFace, version_check=True):
         self.node_id: int = node_id
         self.iface: IFace = iface
+
+        #codec = self.iface.get_codec()
+        
+        eps = {}
+        for k, ep in self.iface.get_ep_map().items():
+            if "write" in ep and "read" in ep:
+                eps[k] = MixedEndpoint(self.iface, ep["read"], ep["write"])
+            elif "write" in ep:
+                eps[k] = WriteEndpoint(self.iface, ep["write"])
+            elif "read" in ep:
+                eps[k] = ReadEndpoint(self.iface, ep["read"])
+            else:
+                raise ValueError("No valid read/write accessors in endpoint")
 
         di = self.device_info
         self.fw_version = ".".join(
@@ -50,49 +63,9 @@ class Tinymovr:
 
 
     def __getattr__(self, _attr: str):
-        attr = strip_end(_attr, "_asdict")
-        eps = self.iface.get_ep_map()
-        codec = self.iface.get_codec()
-        if attr in eps:
-            d = eps[attr]
-
-            if d["type"] == "w":
-                # This is a write-type endpoint
-                def wrapper(*args, **kwargs):
-                    assert len(args) == 0 or len(kwargs) == 0
-                    if len(kwargs) > 0:
-                        assert "labels" in d
-                        inputs = [
-                            kwargs[k] if k in kwargs else d["defaults"][k]
-                            for k in d["labels"]
-                        ]
-                    elif len(args) > 0:
-                        inputs = [
-                            args[i] if i < len(args) else d["defaults"][k]
-                            for i, k in enumerate(d["labels"])
-                        ]
-                    else:
-                        inputs = []
-                    if "units" in d:
-                        inputs = [
-                            v.to(d["units"][i]).magnitude if isinstance(v, _Q) else v
-                            for i, v in enumerate(inputs)
-                        ]
-                    payload = None
-                    if len(inputs) > 0:
-                        payload = codec.serialize(inputs, *d["types"])
-                    self.iface.send(self.node_id, d["ep_id"], payload=payload)
-
-                return wrapper
-
-            elif d["type"] == "r":
-                # This is a read-type endpoint
-                self.iface.send(self.node_id, d["ep_id"])
-                response = self.iface.receive(self.node_id, d["ep_id"])
-                data = codec.deserialize(response, *d["types"])
-                if attr in presenter_map:
-                    return presenter_map[attr](_attr, data, d)
-                return presenter_map["default"](_attr, data, d)
+        ep = self.eps[_attr]   
+        ep.clear_cache()
+        return ep       
 
     def calibrate(self):
         self.set_state(ControlStates.Calibration)
