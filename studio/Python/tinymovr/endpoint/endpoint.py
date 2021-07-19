@@ -16,7 +16,7 @@ class Endpoint:
 class ReadEndpoint(Endpoint):
 
     def __init__(self, iface, read_ep: Dict):
-        super().__init__(iface)
+        Endpoint.__init__(self, iface)
         self.read_ep = read_ep
         self.attrib_cache = {}
         self.data_cache = []
@@ -65,7 +65,7 @@ class ReadEndpoint(Endpoint):
 class WriteEndpoint(Endpoint):
 
     def __init__(self, iface, write_ep: Dict):
-        super().__init__(iface)
+        Endpoint.__init__(self, iface)
         self.write_ep = write_ep
             
     def __call__(self, *args, **kwargs):
@@ -97,5 +97,6 @@ class WriteEndpoint(Endpoint):
 class MixedEndpoint(ReadEndpoint, WriteEndpoint):
 
     def __init__(self, iface, read_ep: Dict, write_ep: Dict):
-        super(ReadEndpoint, self).__init__(iface, read_ep)
-        super(WriteEndpoint, self).__init__(iface, write_ep)
+        ReadEndpoint.__init__(self, iface, read_ep)
+        WriteEndpoint.__init__(self, iface, write_ep)
+

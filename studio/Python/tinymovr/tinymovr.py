@@ -44,6 +44,7 @@ class Tinymovr:
                 eps[k] = ReadEndpoint(self.iface, ep["read"])
             else:
                 raise ValueError("No valid read/write accessors in endpoint")
+        self.eps = eps
 
         di = self.device_info
         self.fw_version = ".".join(
