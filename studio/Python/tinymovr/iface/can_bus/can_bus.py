@@ -1,3 +1,16 @@
+
+''' Tinymovr CAN bus interface module.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+'''
 import math
 import can
 from typing import Tuple, Dict, List
@@ -6,7 +19,7 @@ from serial.tools import list_ports
 import logging
 
 from tinymovr.iface import IFace
-from tinymovr.iface.can_bus import can_endpoints
+from tinymovr.iface.can_bus import can_descriptors
 from tinymovr.codec import MultibyteCodec
 
 
@@ -30,8 +43,8 @@ class CANBus(IFace):
     def get_codec(self):
         return MultibyteCodec()
 
-    def get_ep_map(self) -> Dict:
-        return can_endpoints
+    def get_ep_descriptors(self) -> Dict:
+        return can_descriptors
 
     def send(self, node_id: int, endpoint_id: int, payload: bytearray = None):
         rtr: bool = False if payload and len(payload) else True

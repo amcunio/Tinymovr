@@ -18,7 +18,7 @@ from copy import copy
 import pkg_resources
 from packaging import version
 import json
-from tinymovr.endpoint import ReadEndpoint, WriteEndpoint, MixedEndpoint
+from tinymovr.endpoint import endpoint_class_for_descriptor
 from tinymovr.iface import IFace
 from tinymovr.constants import ControlStates, ControlModes
 from pint import Quantity as _Q
@@ -32,18 +32,9 @@ class Tinymovr:
         self.node_id: int = node_id
         self.iface: IFace = iface
 
-        #codec = self.iface.get_codec()
-        
         eps = {}
-        for k, ep in self.iface.get_ep_map().items():
-            if "write" in ep and "read" in ep:
-                eps[k] = MixedEndpoint(node_id, self.iface, ep["read"], ep["write"])
-            elif "write" in ep:
-                eps[k] = WriteEndpoint(node_id, self.iface, ep["write"])
-            elif "read" in ep:
-                eps[k] = ReadEndpoint(node_id, self.iface, ep["read"])
-            else:
-                raise ValueError("No valid read/write accessors in endpoint")
+        for k, desc in self.iface.get_ep_descriptors().items():
+            eps[k] = endpoint_class_for_descriptor(k, node_id, iface, desc)
         self.eps = eps
 
         di = self.device_info
@@ -72,82 +63,82 @@ class Tinymovr:
         return ep       
 
     def calibrate(self):
-        self.set_state(ControlStates.Calibration)
+        self.state.state = ControlStates.Calibration
 
     def idle(self):
-        self.set_state(ControlStates.Idle)
+        self.state.state = ControlStates.Idle
 
     def position_control(self):
-        self.set_state(ControlStates.ClosedLoopControl, ControlModes.PositionControl)
+        self.state(ControlStates.ClosedLoopControl, ControlModes.PositionControl)
 
     def velocity_control(self):
-        self.set_state(ControlStates.ClosedLoopControl, ControlModes.VelocityControl)
+        self.state(ControlStates.ClosedLoopControl, ControlModes.VelocityControl)
 
     def current_control(self):
-        self.set_state(ControlStates.ClosedLoopControl, ControlModes.CurrentControl)
+        self.state(ControlStates.ClosedLoopControl, ControlModes.CurrentControl)
 
-    def export_config(self, file_path: str):
-        """
-        Export the board config to a file
-        """
-        config_map = {}
-        for k, v in self.iface.get_ep_map().items():
-            if v["type"] == "r" and "ser_map" in v:
-                # Node can be serialized (saved)
-                vals = getattr(self, k)
-                config_map.update(self._data_from_arguments(vals, v["ser_map"]))
-        with open(file_path, "w") as f:
-            json.dump(config_map, f)
+    # def export_config(self, file_path: str):
+    #     """
+    #     Export the board config to a file
+    #     """
+    #     config_map = {}
+    #     for k, v in self.iface.get_ep_descriptors().items():
+    #         if v["type"] == "r" and "ser_map" in v:
+    #             # Node can be serialized (saved)
+    #             vals = getattr(self, k)
+    #             config_map.update(self._data_from_arguments(vals, v["ser_map"]))
+    #     with open(file_path, "w") as f:
+    #         json.dump(config_map, f)
 
-    def restore_config(self, file_path: str):
-        """
-        Restore the board config from a file
-        """
-        with open(file_path, "r") as f:
-            data = json.load(f)
-        for k, v in self.iface.get_ep_map().items():
-            if v["type"] == "w" and "ser_map" in v:
-                # Node has saved data and can be deserialized (restored)
-                kwargs = self._arguments_from_data(v["ser_map"], data)
-                if len(kwargs):
-                    f = getattr(self, k)
-                    f(**kwargs)
+    # def restore_config(self, file_path: str):
+    #     """
+    #     Restore the board config from a file
+    #     """
+    #     with open(file_path, "r") as f:
+    #         data = json.load(f)
+    #     for k, v in self.iface.get_ep_descriptors().items():
+    #         if v["type"] == "w" and "ser_map" in v:
+    #             # Node has saved data and can be deserialized (restored)
+    #             kwargs = self._arguments_from_data(v["ser_map"], data)
+    #             if len(kwargs):
+    #                 f = getattr(self, k)
+    #                 f(**kwargs)
 
-    def _data_from_arguments(self, args, ep_map):
-        """
-        Generate a nested dictionary from a dictionary of values,
-        following the template in ep_map
-        """
-        data = {}
-        for key, value in ep_map.items():
-            if isinstance(value, dict):
-                data[key] = self._data_from_arguments(args, value)
-            elif isinstance(value, tuple):
-                data[key] = {k: getattr(args, k) for k in value}
-            else:
-                raise TypeError("Map is not a dictionary or tuple")
-        return data
+    # def _data_from_arguments(self, args, ep_map):
+    #     """
+    #     Generate a nested dictionary from a dictionary of values,
+    #     following the template in ep_map
+    #     """
+    #     data = {}
+    #     for key, value in ep_map.items():
+    #         if isinstance(value, dict):
+    #             data[key] = self._data_from_arguments(args, value)
+    #         elif isinstance(value, tuple):
+    #             data[key] = {k: getattr(args, k) for k in value}
+    #         else:
+    #             raise TypeError("Map is not a dictionary or tuple")
+    #     return data
 
-    def _arguments_from_data(self, ep_map, ep_data):
-        """
-        Generate a flat argument dictionary from a nested dictionary
-        containing values for keys in endpoint labels
-        """
-        kwargs = {}
-        if isinstance(ep_map, dict) and isinstance(ep_data, dict):
-            for key, value in ep_map.items():
-                if key in ep_data:
-                    kwargs.update(self._arguments_from_data(value, ep_data[key]))
-        elif isinstance(ep_map, tuple) and isinstance(ep_data, dict):
-            for key in ep_map:
-                if key in ep_data:
-                    kwargs[key] = ep_data[key]
-        else:
-            raise TypeError("Mismatch in passed arguments")
-        return kwargs
+    # def _arguments_from_data(self, ep_map, ep_data):
+    #     """
+    #     Generate a flat argument dictionary from a nested dictionary
+    #     containing values for keys in endpoint labels
+    #     """
+    #     kwargs = {}
+    #     if isinstance(ep_map, dict) and isinstance(ep_data, dict):
+    #         for key, value in ep_map.items():
+    #             if key in ep_data:
+    #                 kwargs.update(self._arguments_from_data(value, ep_data[key]))
+    #     elif isinstance(ep_map, tuple) and isinstance(ep_data, dict):
+    #         for key in ep_map:
+    #             if key in ep_data:
+    #                 kwargs[key] = ep_data[key]
+    #     else:
+    #         raise TypeError("Mismatch in passed arguments")
+    #     return kwargs
 
     def __dir__(self):
-        eps = list(self.iface.get_ep_map().keys())
+        eps = list(self.iface.get_ep_descriptors().keys())
         blacklist = ["iface", "node_id", "fw_version"]
         self_attrs = [
             k

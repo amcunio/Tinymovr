@@ -1,7 +1,5 @@
 
-''' Tinymovr endpoints definitions module.
-
-This module includes definitions for all Tinymovr endpoints .
+''' Tinymovr endpoints descriptors module.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +15,7 @@ from typing import Dict
 from tinymovr.codec import DataType
 from tinymovr.units import get_registry
 
-can_endpoints: Dict[str, Dict] = {
+can_descriptors: Dict[str, Dict] = {
     "state":
     {
         "read": 
@@ -26,6 +24,14 @@ can_endpoints: Dict[str, Dict] = {
             "ep_id": 0x003,
             "types": [DataType.UINT8] * 8,
             "labels": ("error", "state", "mode", "error0", "error1", "error2", "error3", "error4")
+        },
+        "write":
+        {
+            "description": "Set Tinymovr State and optionally Control Mode",
+            "ep_id": 0x007,
+            "types": (DataType.UINT8, DataType.UINT8),
+            "defaults": {"mode": 0},
+            "labels": ("state", "mode")
         }
     },
     "min_studio_version":
@@ -56,17 +62,6 @@ can_endpoints: Dict[str, Dict] = {
             "defaults": {"baud_rate": 0},
             "labels": ("id", "baud_rate"),
             "ser_map": {"can": ("id", "baud_rate")}
-        }
-    },
-    "set_state":
-    {
-        "write":
-        {
-            "description": "Set Tinymovr State and optionally Control Mode",
-            "ep_id": 0x007,
-            "types": (DataType.UINT8, DataType.UINT8),
-            "defaults": {"mode": 0},
-            "labels": ("state", "mode")
         }
     },
     "set_offset_dir":

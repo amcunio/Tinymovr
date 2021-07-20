@@ -8,7 +8,7 @@ class IFace:
     def get_codec(self) -> Codec:
         raise NotImplementedError()
 
-    def get_ep_map(self) -> Dict:
+    def get_ep_descriptors(self) -> Dict:
         raise NotImplementedError()
 
     def send(self, node_id: int, endpoint_id: int, payload: bytearray):
