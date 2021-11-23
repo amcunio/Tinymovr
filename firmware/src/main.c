@@ -16,6 +16,7 @@
 //  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <src/encoder/encoder.h>
+#include <src/encoder/qep.h>
 #include "src/common.h"
 #include "src/system/system.h"
 
@@ -29,16 +30,16 @@
 #include "src/can/can.h"
 #include "src/nvm/nvm.h"
 
-int test_div(int lho, int rho)
-{
-    return lho/rho;
-}
 
 int main(void)
 {
   	__disable_irq();
     system_init();
-    MA_Init();
+#if defined(USE_ABS_ENCODER)
+    encoder_init();
+#elif defined(USE_QEP_ENCODER)
+    qep_init();
+#endif
     NVM_Init();
     NVM_LoadConfig(); // This will TRY to deserialize and import config
     UART_Init();

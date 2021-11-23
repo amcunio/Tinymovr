@@ -29,6 +29,10 @@
 
 /// TINYMOVR CONFIGURATION OPTIONS ///
 
+// Encoders
+// #define USE_ABS_ENCODER
+#define USE_QEP_ENCODER
+
 // Uncomment to disable live gate driver control
 // #define DRY_RUN
 

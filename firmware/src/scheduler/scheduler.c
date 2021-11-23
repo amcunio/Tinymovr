@@ -21,6 +21,7 @@
 #include <src/uart/uart_interface.h>
 #include <src/uart/uart_lowlevel.h>
 #include <src/encoder/encoder.h>
+#include <src/encoder/qep.h>
 #include <src/observer/observer.h>
 
 struct SchedulerState
@@ -66,10 +67,17 @@ void WaitForControlLoopInterrupt(void)
 	state.busy_loop_start = DWT->CYCCNT;
 	// We have to service the control loop by updating
 	// current measurements and encoder estimates.
-	MA_QueueAngleCommand();
+#if defined(USE_ABS_ENCODER)
+	encoder_queue_pos_command();
+#endif
 	ADC_UpdateMeasurements();
-	MA_UpdateAngle(true);
-	Observer_UpdateEstimates();
+#if defined(USE_ABS_ENCODER)
+	encoder_update_pos(true);
+	observer_update_estimates(encoder_get_pos());
+#elif defined(USE_QEP_ENCODER)
+	observer_update_estimates(qep_get_pos());
+#endif
+
 	// At this point control is returned to main loop.
 }
 
