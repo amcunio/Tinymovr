@@ -17,5 +17,8 @@
 
 #pragma once
 
+#include <src/common.h>
+#include <src/encoder/encoder_struct.h>
+
 void qep_init(void);
-PAC5XXX_RAMFUNC static inline uint16_t qep_get_counter_value(void);
+PAC5XXX_RAMFUNC uint16_t qep_get_pos(void);

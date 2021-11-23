@@ -75,7 +75,7 @@ void qep_init(void)
     QEP_TIMER->QEPCTL.QEPEN = true;
 }
 
-PAC5XXX_RAMFUNC static inline uint16_t qep_get_counter_value(void)
+PAC5XXX_RAMFUNC uint16_t qep_get_pos(void)
 {
     // Shift it from 31:16 bit to value from 15:0 bit, same 16 bits
     return  (uint16_t) ((QEP_TIMER->QEPCTL.TICKS) >> 16);

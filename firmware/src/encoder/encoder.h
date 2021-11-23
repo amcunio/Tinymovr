@@ -15,11 +15,10 @@
 //  * You should have received a copy of the GNU General Public License 
 //  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef ENCODERS_MA702_H_
-#define ENCODERS_MA702_H_
+#pragma once
 
-#include <stdbool.h>
-#include "src/common.h"
+#include <src/common.h>
+#include <src/encoder/encoder_struct.h>
 
 #define MAX_ALLOWED_DELTA			 (1024)
 
@@ -34,14 +33,7 @@ typedef enum {
     MA_CMD_ANGLE            = 0x0000
 } MA702Command;
 
-struct MA702State
-{
-	int16_t angle;
-};
-
-void MA_Init(void);
-PAC5XXX_RAMFUNC void MA_QueueAngleCommand(void);
-PAC5XXX_RAMFUNC int16_t MA_GetAngle(void);
-PAC5XXX_RAMFUNC void MA_UpdateAngle(bool check_error);
-
-#endif /* ENCODERS_MA702_H_ */
+void encoder_init(void);
+PAC5XXX_RAMFUNC void encoder_queue_pos_command(void);
+PAC5XXX_RAMFUNC int16_t encoder_get_pos(void);
+PAC5XXX_RAMFUNC void encoder_update_pos(bool check_error);

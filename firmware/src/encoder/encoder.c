@@ -15,45 +15,44 @@
 //  * You should have received a copy of the GNU General Public License 
 //  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include "src/common.h"
+#include <src/common.h>
 #include "src/system/system.h"
 #include "src/ssp/ssp_func.h"
 #include <src/encoder/encoder.h>
 
-static struct MA702State state = { 0 };
+static struct EncoderState state = { 0 };
 
 #define MAX_ALLOWED_DELTA_ADD (MAX_ALLOWED_DELTA + ENCODER_TICKS)
 #define MAX_ALLOWED_DELTA_SUB (MAX_ALLOWED_DELTA - ENCODER_TICKS)
 #define MIN_ALLOWED_DELTA_ADD (-MAX_ALLOWED_DELTA + ENCODER_TICKS)
 #define MIN_ALLOWED_DELTA_SUB (-MAX_ALLOWED_DELTA - ENCODER_TICKS)
 
-void MA_Init(void)
+void encoder_init(void)
 {
     ssp_init(SSPD, SSP_MS_MASTER, 0, 0); // Mode 0
     system_delay_us(16000); // ensure 16ms sensor startup time as per the datasheet
-    MA_QueueAngleCommand();
-    MA_UpdateAngle(false);
+    encoder_queue_pos_command();
+    encoder_update_pos(false);
 }
 
-PAC5XXX_RAMFUNC void MA_QueueAngleCommand(void)
+PAC5XXX_RAMFUNC void encoder_queue_pos_command(void)
 {
 	ssp_write_one(SSPD, MA_CMD_ANGLE);
 }
 
-PAC5XXX_RAMFUNC int16_t MA_GetAngle(void)
+PAC5XXX_RAMFUNC int16_t encoder_get_pos(void)
 {
-    return state.angle;
+    return state.position;
 }
 
-PAC5XXX_RAMFUNC void MA_UpdateAngle(bool check_error)
+PAC5XXX_RAMFUNC void encoder_update_pos(bool check_error)
 {
-	//ssp_write_one(SSPD, MA_CMD_ANGLE);
     while (!PAC55XX_SSPD->STAT.RNE) {}
-    const int16_t angle = (PAC55XX_SSPD->DAT.DATA) >> 3;
+    const int16_t position = (PAC55XX_SSPD->DAT.DATA) >> 3;
 
     if (check_error)
     {
-    	const int16_t delta = state.angle - angle;
+    	const int16_t delta = state.position - position;
 		if ( ((delta > MAX_ALLOWED_DELTA) || (delta < -MAX_ALLOWED_DELTA)) &&
 		     ((delta > MAX_ALLOWED_DELTA_ADD) || (delta < MIN_ALLOWED_DELTA_ADD)) &&
 		     ((delta > MAX_ALLOWED_DELTA_SUB) || (delta < MIN_ALLOWED_DELTA_SUB)) )
@@ -61,5 +60,5 @@ PAC5XXX_RAMFUNC void MA_UpdateAngle(bool check_error)
 			add_error_flag(ERROR_ENCODER_READING_UNSTABLE);
 		}
     }
-    state.angle = angle;
+    state.position = position;
 }
