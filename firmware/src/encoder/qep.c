@@ -18,8 +18,8 @@
 #include <src/common.h>
 #include <src/encoder/qep.h>
 
-#define QEP_TIMER                       PAC55XX_TIMERC
-#define QEP_TIMERX                      TimerC
+#define QEP_TIMER                       PAC55XX_TIMERB
+#define QEP_TIMERX                      TimerB
 
 //=====================================
 // QEP Input Port Definitions
@@ -36,9 +36,9 @@ void qep_init(void)
     PAC55XX_SCC->PDMUXSEL.QEPIDX_PORTNUM = 4;
 
     // Configure ports as inputs
-    PAC55XX_GPIOB->MODE.QEPPHB_PORTNUM = 3;
-    PAC55XX_GPIOB->MODE.QEPPHA_PORTNUM = 3;
-    PAC55XX_GPIOB->MODE.QEPIDX_PORTNUM = 3;
+    PAC55XX_GPIOD->MODE.QEPPHB_PORTNUM = 3;
+    PAC55XX_GPIOD->MODE.QEPPHA_PORTNUM = 3;
+    PAC55XX_GPIOD->MODE.QEPIDX_PORTNUM = 3;
 
     // Disable pullups
     PAC55XX_SCC->PDPUEN.QEPPHB_PORTNUM = 0;
