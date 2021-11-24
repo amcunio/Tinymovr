@@ -67,11 +67,11 @@ void WaitForControlLoopInterrupt(void)
 	state.busy_loop_start = DWT->CYCCNT;
 	// We have to service the control loop by updating
 	// current measurements and encoder estimates.
-#if defined(USE_ABS_ENCODER)
+#if defined(USE_PRIMARY_ENCODER)
 	encoder_queue_pos_command();
 #endif
 	ADC_UpdateMeasurements();
-#if defined(USE_ABS_ENCODER)
+#if defined(USE_PRIMARY_ENCODER)
 	encoder_update_pos(true);
 	observer_update_estimates(encoder_get_pos());
 #elif defined(USE_QEP_ENCODER)

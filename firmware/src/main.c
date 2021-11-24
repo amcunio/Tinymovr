@@ -35,7 +35,7 @@ int main(void)
 {
   	__disable_irq();
     system_init();
-#if defined(USE_ABS_ENCODER)
+#if defined(USE_PRIMARY_ENCODER)
     encoder_init();
 #elif defined(USE_QEP_ENCODER)
     qep_init();

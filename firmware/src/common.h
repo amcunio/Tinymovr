@@ -69,7 +69,7 @@
 
 #define ERROR_FLAG_MAX_SIZE 5u
 
-#if defined(USE_ABS_ENCODER)
+#if defined(USE_PRIMARY_ENCODER)
 #define ENCODER_TICKS               (8192)
 #define ENCODER_HALF_TICKS          (ENCODER_TICKS / 2)
 #define ENCODER_TICKS_FLOAT         (8192.f)

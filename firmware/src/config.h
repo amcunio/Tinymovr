@@ -36,6 +36,9 @@
 // #define BOARD_REV_R3
 #define BOARD_REV_T5
 
+// --- Encoders
+// #define USE_PRIMARY_ENCODER
+#define USE_QEP_ENCODER
 
 #define ACLK_FREQ_HZ                (300000000)
 #define HCLK_FREQ_HZ                (150000000)
