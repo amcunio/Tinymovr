@@ -29,9 +29,6 @@
 
 /// TINYMOVR CONFIGURATION OPTIONS ///
 
-// Encoders
-// #define USE_ABS_ENCODER
-#define USE_QEP_ENCODER
 // --- Board Version
 // #define BOARD_REV_R3
 #define BOARD_REV_T5
@@ -40,16 +37,17 @@
 // #define USE_PRIMARY_ENCODER
 #define USE_QEP_ENCODER
 
+// --- Clock frequencies
 #define ACLK_FREQ_HZ                (300000000)
 #define HCLK_FREQ_HZ                (150000000)
 
-// Timer clock divider
+// --- Timer clock divider
 #define TXCTL_PS_DIV                TXCTL_PS_DIV2
 
-// Desired PWM Frequency (Hz).
+// --- Desired PWM Frequency (Hz).
 #define PWM_FREQ_HZ              (20000)
 
-// Limits
+// --- Limits
 #define PWM_LIMIT                   (0.8f)
 #define I_INTEGRATOR_DECAY_FACTOR   (0.995f)
 #define I_TRIP_MARGIN               (1.35f)
@@ -57,7 +55,7 @@
 #define VEL_HARD_LIMIT              (600000) // ticks/s
 #define I_HARD_LIMIT                (60.0)   // A
 
-// Calibration
+// --- Calibration
 #define CAL_R_LEN             (2 * PWM_FREQ_HZ)
 #define CAL_L_LEN             (1 * PWM_FREQ_HZ)
 #define CAL_OFFSET_LEN        (1 * PWM_FREQ_HZ)
@@ -69,11 +67,11 @@
 #define CAL_V_GAIN (0.0005f)
 #define CAL_V_INDUCTANCE (2.0f)
 
-// Eccentricity correction lookup table size
+// --- Eccentricity correction lookup table size
 #define ECN_BITS (6)
 #define ECN_SIZE (2 << ECN_BITS)
 
-// UART
+// --- UART
 #define UART_ENUM UARTB
 #define UART_REF PAC55XX_UARTB
 #define UART_BAUD_RATE 115200
