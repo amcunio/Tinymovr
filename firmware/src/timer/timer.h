@@ -39,6 +39,24 @@ typedef enum
     SINGLE_SHOT                         = 1,        // The timer single shot
 }TXCTL_SINGLE_Type;
 
+typedef enum 
+{
+    PHASE_A_ONLY                        = 0,        // The timer auto reload
+    PHASE_AB_BOTH                       = 1,        // The timer single shot 
+}TXQEPCTL_CNTAB_Type;
+
+typedef enum 
+{
+    RISING_EDGE_ONLY                    = 0,        // The timer auto reload
+    RISING_FALLING_EDGE_BOTH            = 1,        // The timer single shot 
+}TXQEPCTL_CNTEDGE_Type;
+
+typedef enum 
+{
+    NOT_RESET_TICKS                     = 0,        // The timer auto reload
+    RESET_TICKS_ON_INDEX_RISING_EDGE    = 1,        // The timer single shot 
+}TXQEPCTL_IDXRST_Type;
+
 void Timer_Init(void);
 
 #endif /* TIMER_TIMER_H_ */

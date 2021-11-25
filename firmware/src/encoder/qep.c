@@ -16,10 +16,11 @@
 //  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <src/common.h>
+#include <src/timer/timer.h>
 #include <src/encoder/qep.h>
 
-#define QEP_TIMER                       PAC55XX_TIMERB
-#define QEP_TIMERX                      TimerB
+#define QEP_TIMER                       PAC55XX_TIMERD
+#define QEP_TIMERX                      TimerD
 
 //=====================================
 // QEP Input Port Definitions
@@ -30,15 +31,50 @@
 
 void qep_init(void)
 {
+    pac5xxx_timer_clock_config(QEP_TIMERX, TXCTL_CS_ACLK, TXCTL_PS_DIV16);
+    pac5xxx_timer_base_config(
+        QEP_TIMERX, 
+        0xFFFF, 
+        AUTO_RELOAD, 
+        TxCTL_MODE_UP, 
+        TIMER_SLAVE_SYNC_DISABLE
+    );
+
+    // Enable QEP timer
+    QEP_TIMER->QEPCTL.QEPEN = true;
+
+    // Count on rising and falling edge
+    QEP_TIMER->QEPCTL.CNTEDGE = RISING_FALLING_EDGE_BOTH;
+    // Count on both A and B inputs
+    QEP_TIMER->QEPCTL.CNTAB = PHASE_AB_BOTH;
+
+    // Reset counter on Index
+    QEP_TIMER->QEPCTL.IDXRST = NOT_RESET_TICKS;
+
+    QEP_TIMER->QEPCTL.DIRIE = 0;                                               // 1--> enable direction change interrupt
+    QEP_TIMER->QEPCTL.IFCLEAR = (1 << 0);
+    
+    QEP_TIMER->QEPCTL.PHAIE = 0;                                               // 1--> enable Phase A rising edge interrupt
+    QEP_TIMER->QEPCTL.IFCLEAR = (1 << 1);
+        
+    QEP_TIMER->QEPCTL.PHBIE = 0;                                               // 1--> enable Phase B rising edge interrupt
+    QEP_TIMER->QEPCTL.IFCLEAR = (1 << 2); 
+        
+    QEP_TIMER->QEPCTL.WRIE = 0;                                                // 1--> enable overflow or underflow in the TAQEPCTL.TICKS interrupt
+    QEP_TIMER->QEPCTL.IFCLEAR = (1 << 3);
+        
+    QEP_TIMER->QEPCTL.IDXEVIE = 0;                                             // 1--> enable index event interrupt
+    QEP_TIMER->QEPCTL.IFCLEAR = (1 << 4);
+
     // Select GPIO peripheral MUX
-    PAC55XX_SCC->PDMUXSEL.QEPPHB_PORTNUM = 4;
-    PAC55XX_SCC->PDMUXSEL.QEPPHA_PORTNUM = 4;
-    PAC55XX_SCC->PDMUXSEL.QEPIDX_PORTNUM = 4;
+    PAC55XX_SCC->PDMUXSEL.QEPPHB_PORTNUM = 3;
+    PAC55XX_SCC->PDMUXSEL.QEPPHA_PORTNUM = 3;
+    PAC55XX_SCC->PDMUXSEL.QEPIDX_PORTNUM = 3;
 
     // Configure ports as inputs
-    PAC55XX_GPIOD->MODE.QEPPHB_PORTNUM = 3;
-    PAC55XX_GPIOD->MODE.QEPPHA_PORTNUM = 3;
-    PAC55XX_GPIOD->MODE.QEPIDX_PORTNUM = 3;
+    PAC55XX_GPIOD->MODE.QEPPHB_PORTNUM = IO_HIGH_IMPEDENCE_INPUT;
+    PAC55XX_GPIOD->MODE.QEPPHA_PORTNUM = IO_HIGH_IMPEDENCE_INPUT;
+    PAC55XX_GPIOD->MODE.QEPIDX_PORTNUM = IO_HIGH_IMPEDENCE_INPUT;
 
     // Disable pullups
     PAC55XX_SCC->PDPUEN.QEPPHB_PORTNUM = 0;
@@ -49,29 +85,10 @@ void qep_init(void)
     PAC55XX_SCC->PDPDEN.QEPPHB_PORTNUM = 0;
     PAC55XX_SCC->PDPDEN.QEPPHA_PORTNUM = 0;
     PAC55XX_SCC->PDPDEN.QEPIDX_PORTNUM = 0;
-
-    pac5xxx_timer_clock_config(QEP_TIMERX, TXCTL_CS_PCLK, TXCTL_PS_DIV1);
-
-    // Count on rising and falling edge
-    QEP_TIMER->QEPCTL.CNTEDGE = true;
-    // Count on both A and B inputs
-    QEP_TIMER->QEPCTL.CNTAB = true;
-
-    // Reset counter on Index
-    //QEP_TIMER->QEPCTL.IDXRST = false;
-
-    // Configure QEP interrupts
-    QEP_TIMER->QEPCTL.IDXEVIE = false;
-    QEP_TIMER->QEPCTL.DIRIE = false;
-    QEP_TIMER->QEPCTL.PHAIE = false;
-    QEP_TIMER->QEPCTL.PHBIE = false;
-
-    // Enabled QEP timer
-    QEP_TIMER->QEPCTL.QEPEN = true;
 }
 
 PAC5XXX_RAMFUNC uint16_t qep_get_pos(void)
 {
     // Shift it from 31:16 bit to value from 15:0 bit, same 16 bits
-    return  (uint16_t) ((QEP_TIMER->QEPCTL.TICKS) >> 16);
+    return  (uint16_t) QEP_TIMER->QEPCTL.TICKS;
 }
