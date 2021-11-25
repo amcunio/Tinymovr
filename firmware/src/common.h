@@ -72,12 +72,11 @@
 #if defined(USE_PRIMARY_ENCODER)
 #define ENCODER_TICKS               (8192)
 #define ENCODER_HALF_TICKS          (ENCODER_TICKS / 2)
-#define ENCODER_TICKS_FLOAT         (8192.f)
 #elif defined(USE_QEP_ENCODER)
-#define ENCODER_TICKS               (2048)
+#define ENCODER_TICKS               (3192)
 #define ENCODER_HALF_TICKS          (ENCODER_TICKS / 2)
-#define ENCODER_TICKS_FLOAT         (2048.f)
 #endif
+#define ENCODER_TICKS_FLOAT         ((float)ENCODER_TICKS)
 
 #define PI       (3.141592f)
 #define TWOPI    (6.283185f)
