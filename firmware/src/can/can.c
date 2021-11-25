@@ -39,11 +39,9 @@ void CAN_init(void)
     CANEP_InitEndpointMap();
 
 #if defined(BOARD_REV_T5)
-    // Configure PD7 as GPIO input with pulldown
-    PAC55XX_GPIOD->MODE.P7 = IO_HIGH_IMPEDENCE_INPUT;
-    PAC55XX_GPIOD->OUTMASK.P7 = 1;
-    PAC55XX_SCC->PDMUXSEL.P7 = 0;
-    PAC55XX_SCC->PDPDEN.P7 = 1;
+    PAC55XX_GPIOD->MODE.P7 = IO_PUSH_PULL_OUTPUT;   // PE1 GPIO configured as an output
+    PAC55XX_SCC->PDMUXSEL.w &= 0xFFFFFF0F;          // Clear bits to select GPIO function via PE mux select
+    PAC55XX_GPIOD->OUT.P7 = 0;                      // Set PD7 high to force transceiver into normal mode
 #elif defined(BOARD_REV_R5)
     // Configure PF4 as GPIO input
     PAC55XX_GPIOF->MODE.P4 = IO_HIGH_IMPEDENCE_INPUT;
@@ -53,7 +51,7 @@ void CAN_init(void)
 
     // Configure PE1 as a GPIO output
     PAC55XX_GPIOE->MODE.P1 = IO_PUSH_PULL_OUTPUT;   // PE1 GPIO configured as an output
-    PAC55XX_SCC->PEMUXSEL.w &= 0xFFFFFF0F;          // Clear bits to select GPIO for PE1 via PE mux select
+    PAC55XX_SCC->PEMUXSEL.w &= 0xFFFFFF0F;          // Clear bits to select GPIO function via PE mux select
     PAC55XX_GPIOE->OUT.P1 = 1;                      // Set PE1 high to force transceiver into normal mode
 
     // Wait for CAN transceiver to enter normal mode
