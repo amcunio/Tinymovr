@@ -75,7 +75,7 @@ void WaitForControlLoopInterrupt(void)
 	encoder_update_pos(true);
 	observer_update_estimates(encoder_get_pos());
 #elif defined(USE_QEP_ENCODER)
-	observer_update_estimates(qep_get_pos());
+	observer_update_estimates(qep_get_pos_wrapped());
 #endif
 
 	// At this point control is returned to main loop.

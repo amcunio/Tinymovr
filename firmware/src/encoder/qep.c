@@ -29,6 +29,8 @@
 #define QEPPHA_PORTNUM                  P5
 #define QEPIDX_PORTNUM                  P4
 
+QEPState state = {0};
+
 void qep_init(void)
 {
     pac5xxx_timer_clock_config(QEP_TIMERX, TXCTL_CS_ACLK, TXCTL_PS_DIV16);
@@ -87,8 +89,22 @@ void qep_init(void)
     PAC55XX_SCC->PDPDEN.QEPIDX_PORTNUM = 0;
 }
 
-PAC5XXX_RAMFUNC uint16_t qep_get_pos(void)
+PAC5XXX_RAMFUNC uint16_t qep_get_pos_wrapped(void)
 {
-    // Shift it from 31:16 bit to value from 15:0 bit, same 16 bits
-    return  (uint16_t) QEP_TIMER->QEPCTL.TICKS;
+    // PAC55XX uses a uint16 to store the qep value. To get a value
+    // that is wrapped in a single encoder turn, we need to first
+    // unwrap into a continuous position, and then wrap to encoder
+    // resolution.
+    const int32_t raw_val = (uint16_t) QEP_TIMER->QEPCTL.TICKS;
+    const int16_t diff = raw_val - state.prev_raw_val;
+    state.prev_raw_val = raw_val;
+    if (diff <= ENCODER_HALF_TICKS)
+    {
+        state.overflows += 1;
+    }
+    else if (diff > ENCODER_HALF_TICKS)
+    {
+        state.overflows -= 1;
+    }
+    raw_val += state.overflows * ENCODER_TICKS;
 }

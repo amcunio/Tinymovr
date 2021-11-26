@@ -19,7 +19,7 @@
 
 PAC5XXX_RAMFUNC float unwrapf(float reference_val, float wrapped_val, float half_interval)
 {
-    float full_interval = half_interval * 2.0f;
+    const float full_interval = half_interval * 2.0f;
 	float delta = fmodf((wrapped_val - reference_val) + half_interval, 
 		full_interval) - half_interval;
     if (delta < 0.0f)
@@ -32,7 +32,7 @@ PAC5XXX_RAMFUNC float unwrapf(float reference_val, float wrapped_val, float half
 
 PAC5XXX_RAMFUNC float wrapf(float unbound_val, float half_interval)
 {
-    float full_interval = half_interval * 2.0f;
+    const float full_interval = half_interval * 2.0f;
     float bound_val = unbound_val;
     while (bound_val > half_interval)
     {
@@ -169,42 +169,6 @@ PAC5XXX_RAMFUNC bool our_clamp(float *d, float min, float max)
         clamped = true;
     }
     return clamped;
-}
-
-PAC5XXX_RAMFUNC int ltoa(int32_t value, uint8_t *sp, int radix)
-{
-    char tmp[64];// be careful with the length of the buffer
-    char *tp = tmp;
-    uint32_t v;
-
-    const int sign = (radix == 10 && value < 0);
-    if (sign)
-        v = -value;
-    else
-        v = (uint32_t)value;
-
-    while (v || tp == tmp)
-    {
-        const int i = v % radix;
-        v /= radix; // v/=radix uses less CPU clocks than v=v/radix does
-        if (i < 10)
-          *tp++ = i+'0';
-        else
-          *tp++ = i + 'a' - 10;
-    }
-
-    int len = tp - tmp;
-
-    if (sign)
-    {
-        *sp++ = '-';
-        len++;
-    }
-
-    while (tp > tmp)
-        *sp++ = *--tp;
-
-    return len;
 }
 
 PAC5XXX_RAMFUNC char checksum(char* msg, uint8_t len)

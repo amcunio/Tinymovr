@@ -20,5 +20,10 @@
 #include <src/common.h>
 #include <src/encoder/encoder_struct.h>
 
+typedef struct {
+    int32_t overflows;
+    uint16_t prev_raw_val;
+} QEPState;
+
 void qep_init(void);
-PAC5XXX_RAMFUNC uint16_t qep_get_pos(void);
+PAC5XXX_RAMFUNC uint16_t qep_get_pos_wrapped(void);

@@ -38,7 +38,6 @@ PAC5XXX_RAMFUNC float fabsf(float x);
 PAC5XXX_RAMFUNC float floorf(float x);
 PAC5XXX_RAMFUNC float fmodf(float a, float b);
 PAC5XXX_RAMFUNC bool our_clamp(float *d, float min, float max);
-PAC5XXX_RAMFUNC int ltoa(int32_t value, uint8_t *sp, int radix);
 PAC5XXX_RAMFUNC char checksum(char* msg, uint8_t len);
 
 // https://github.com/madcowswe/ODrive/blob/3113aedf081cf40e942d25d3b0b36c8806f11f23/Firmware/MotorControl/utils.c
