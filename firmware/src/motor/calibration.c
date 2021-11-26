@@ -111,10 +111,6 @@ bool CalibrateInductance(void)
 
 bool CalibrateDirectionAndPolePairs(void)
 {
-    // Note that, in order to generate the error table,
-    // we read the unwrapped positions given by the
-    // observer, but we generate and use the error table
-    // before the observer, at the encoder read.
     const float epos_target = CAL_PHASE_TURNS * TWOPI;
     const float I_setpoint = motor_get_I_cal();
     bool success = true;
@@ -160,6 +156,11 @@ bool CalibrateDirectionAndPolePairs(void)
 
 bool CalibrateOffsetAndEccentricity(void)
 {
+    // Note that, in order to generate the error table,
+    // we read the unwrapped positions given by the
+    // observer, but we generate and use the error table
+    // before the observer, at the encoder read.
+    
     // Size below is an arbitrary large number ie > ECN_SIZE * npp
     int16_t error_ticks[ECN_SIZE * 24];
     const int16_t npp = motor_get_pole_pairs();
