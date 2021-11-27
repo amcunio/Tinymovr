@@ -96,16 +96,16 @@ PAC5XXX_RAMFUNC uint16_t qep_get_pos_wrapped(void)
     // that is wrapped in a single encoder turn, we need to first
     // unwrap into a continuous position, and then wrap to encoder
     // resolution.
-    int32_t raw_val = (uint16_t) QEP_TIMER->QEPCTL.TICKS;
-    const int16_t diff = raw_val - state.prev_raw_val;
+    const int32_t raw_val = (int32_t) QEP_TIMER->QEPCTL.TICKS;
+    const int32_t diff = raw_val - state.prev_raw_val;
     state.prev_raw_val = raw_val;
-    if (diff <= ENCODER_HALF_TICKS)
+    if (diff <= -QEP_HALF_RANGE)
     {
         state.overflows += 1;
     }
-    else if (diff > ENCODER_HALF_TICKS)
+    else if (diff > QEP_HALF_RANGE)
     {
         state.overflows -= 1;
     }
-    return wrapi_min_max(raw_val + state.overflows * ENCODER_TICKS, 0, ENCODER_TICKS);
+    return wrapi_min_max(raw_val + state.overflows * QEP_RANGE, 0, ENCODER_TICKS);
 }

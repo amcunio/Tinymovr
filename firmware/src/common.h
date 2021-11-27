@@ -75,6 +75,8 @@
 #elif defined(USE_QEP_ENCODER)
 #define ENCODER_TICKS               (3192)
 #define ENCODER_HALF_TICKS          (ENCODER_TICKS / 2)
+#define QEP_RANGE					(65535)
+#define QEP_HALF_RANGE				(QEP_RANGE / 2)
 #endif
 #define ENCODER_TICKS_FLOAT         ((float)ENCODER_TICKS)
 
