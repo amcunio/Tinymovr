@@ -18,9 +18,13 @@
 #pragma once
 
 #include <src/common.h>
-#include <src/encoder/encoder_struct.h>
 
 #define MAX_ALLOWED_DELTA			 (1024)
+
+struct EncoderState
+{
+	int16_t position;
+};
 
 typedef enum {
     ENCODER_ERR_NO_ERROR        = 0x0000,

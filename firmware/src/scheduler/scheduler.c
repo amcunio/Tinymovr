@@ -24,7 +24,7 @@
 #include <src/encoder/qep.h>
 #include <src/observer/observer.h>
 
-struct SchedulerState
+typedef struct 
 {
 	bool adc_interrupt;
 	bool can_interrupt;
@@ -34,9 +34,9 @@ struct SchedulerState
     uint32_t total_cycles;
     uint32_t busy_loop_start;
     uint32_t total_loop_start;
-};
+} SchedulerState;
 
-struct SchedulerState state = {0};
+static SchedulerState state = {0};
 
 void WaitForControlLoopInterrupt(void)
 {

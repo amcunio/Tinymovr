@@ -17,6 +17,7 @@
 
 #include <src/common.h>
 #include <src/timer/timer.h>
+#include <src/utils/utils.h>
 #include <src/encoder/qep.h>
 
 #define QEP_TIMER                       PAC55XX_TIMERD
@@ -29,7 +30,7 @@
 #define QEPPHA_PORTNUM                  P5
 #define QEPIDX_PORTNUM                  P4
 
-QEPState state = {0};
+static QEPState state = {0};
 
 void qep_init(void)
 {
@@ -95,7 +96,7 @@ PAC5XXX_RAMFUNC uint16_t qep_get_pos_wrapped(void)
     // that is wrapped in a single encoder turn, we need to first
     // unwrap into a continuous position, and then wrap to encoder
     // resolution.
-    const int32_t raw_val = (uint16_t) QEP_TIMER->QEPCTL.TICKS;
+    int32_t raw_val = (uint16_t) QEP_TIMER->QEPCTL.TICKS;
     const int16_t diff = raw_val - state.prev_raw_val;
     state.prev_raw_val = raw_val;
     if (diff <= ENCODER_HALF_TICKS)
@@ -106,5 +107,5 @@ PAC5XXX_RAMFUNC uint16_t qep_get_pos_wrapped(void)
     {
         state.overflows -= 1;
     }
-    raw_val += state.overflows * ENCODER_TICKS;
+    return wrapi_min_max(raw_val + state.overflows * ENCODER_TICKS, 0, ENCODER_TICKS);
 }
